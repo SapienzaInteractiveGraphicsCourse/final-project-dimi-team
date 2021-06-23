@@ -35,6 +35,10 @@ camera.attachControl(canvas, true);
 
 
 //ROBOT
+
+var robbox = BABYLON.MeshBuilder.CreateBox("robbox",{ height: 30, width: 50, depth: 10}, scene);
+robbox.visibility = 0.5;
+
 var cub1 = BABYLON.Mesh.CreateSphere("cub1", 15, 25, scene);
 cub1.position = new BABYLON.Vector3(70, 23, 0);
 var a = BABYLON.CSG.FromMesh(cub1);
@@ -54,6 +58,8 @@ anibot.position.z = -200;
 cub1.dispose();
 tot.dispose();
 
+
+//anibot.physicsImpostor = new BABYLON.PhysicsImpostor(anibot, BABYLON.PhysicsImpostor.BoxImpostor, {mass: 0.001, restitution: 0}, scene);
 const myShape = [
     new BABYLON.Vector3(0, 0, 0),
     new BABYLON.Vector3(20, 10, 0),
@@ -63,11 +69,32 @@ const myShape = [
 ];
 
 //Create lathe
-const anibotbot = BABYLON.MeshBuilder.CreateLathe("anibotbot", {shape: myShape});
-anibotbot.scaling = new BABYLON.Vector3(0.35, 0.35, 0.35);
-anibotbot.parent = anibot;
-anibotbot.position = new BABYLON.Vector3(0, -18, 0);
+//const anibotbot = new BABYLON.MeshBuilder.CreateCapsule("anibotbot", {radius:0.5, height:10, radiusTop:4});
+//const anibotbot = BABYLON.MeshBuilder.CreateLathe("anibotbot", {shape: myShape});
+//anibotbot.scaling = new BABYLON.Vector3(0.35, 0.35, 0.35);
+//anibotbot.parent = anibot;
+//anibotbot.position = new BABYLON.Vector3(0, -7, 0);
+//anibotbot.rotation.z = 90*Math.PI/2;
 
+const anibotbot = BABYLON.SceneLoader.ImportMesh("", "./assets/elica/", "15532_P-38EJL_Lightning_Propeller_V1_new.obj", scene, function(object) {
+    // You can apply properties to object.
+    ani = object[0];
+    ani.scaling = new BABYLON.Vector3(0.07, 0.1, 0.1);
+    ani.position.y=-10;
+    ani.rotation.z=180*Math.PI/2;
+    ani.parent = anibot;
+    var mat = new BABYLON.StandardMaterial("mat", scene);
+                    var texture = new BABYLON.Texture("textures/elica.jpg", scene);
+                    mat.diffuseTexture = texture;
+                    ani.material=mat;
+                    scene.registerBeforeRender(function () {
+                       ani.rotation.y -=1;
+                     
+        
+                    });
+   });
+   anibotbot.parent = anibot;
+   
 
 var planeOpts = {
     height: 10, 
@@ -123,17 +150,21 @@ baselica.parent = anibot;
 baselica.position.x = -10;
 baselica.rotation.z = Math.PI/2;
 
+var sphelica = BABYLON.Mesh.CreateSphere("robhead", 32, 5, scene);
+sphelica.parent = baselica;
+sphelica.position.y = 8;
+
 const elica = BABYLON.MeshBuilder.CreateSphere("elica", {arc: 0.3, sideOrientation: BABYLON.Mesh.DOUBLESIDE,diameterX: 8, diameterY: 3.5, diameterZ: 3.5});
-elica.parent = baselica;
-elica.position.y = 8;
+elica.parent = sphelica;
+elica.position.y = 0;
 elica.position.x = 5;
 elica.rotation.z = 180*Math.PI/2;
 elica.rotation.y = 90*Math.PI/2;
 elica.rotation.x = Math.PI/2;
 
 const elica2 = BABYLON.MeshBuilder.CreateSphere("elica2", {arc: 0.3, sideOrientation: BABYLON.Mesh.DOUBLESIDE,diameterX: 8, diameterY: 3.5, diameterZ: 3.5});
-elica2.parent = baselica;
-elica2.position.y = 8;
+elica2.parent = sphelica;
+elica2.position.y = 0;
 elica2.position.x = 0;
 elica2.position.z = -5;
 elica2.rotation.z = 90*Math.PI/2;
@@ -141,8 +172,8 @@ elica2.rotation.y = Math.PI/2;
 elica2.rotation.x = Math.PI/2;
 
 const elica3 = BABYLON.MeshBuilder.CreateSphere("elica3", {arc: 0.3, sideOrientation: BABYLON.Mesh.DOUBLESIDE,diameterX: 8, diameterY: 3.5, diameterZ: 3.5});
-elica3.parent = baselica;
-elica3.position.y = 8;
+elica3.parent = sphelica;
+elica3.position.y = 0;
 elica3.position.x = 0;
 elica3.position.z = 5;
 elica3.rotation.z = 90*Math.PI/2;
@@ -151,12 +182,26 @@ elica3.rotation.z = 90*Math.PI/2;
 elica3.rotation.x = Math.PI/2;
 
 const elica4 = BABYLON.MeshBuilder.CreateSphere("elica4", {arc: 0.3, sideOrientation: BABYLON.Mesh.DOUBLESIDE,diameterX: 8, diameterY: 3.5, diameterZ: 3.5});
-elica4.parent = baselica;
-elica4.position.y = 8;
+elica4.parent = sphelica;
+elica4.position.y = 0;
 elica4.position.x = -5;
 elica4.rotation.z = 90*Math.PI/2;
 elica4.rotation.y = 90*Math.PI/2;
 elica4.rotation.x = Math.PI/2;
+
+var a = 0;
+
+// Code in this function will run ~60 times per second
+scene.registerBeforeRender(function () {
+    a +=0.005;
+        sphelica.rotation.y += 0.5;
+        //anibotbot.rotation.y-=0.05;
+       // anibotbot.rotate(new BABYLON.Vector3 (0.1,1.2,0.1), 0.15, BABYLON.Space.LOCAL); 
+
+  
+
+
+});
 
 
 var leftarm1 = BABYLON.MeshBuilder.CreateCylinder("leftarm1", {diameterTop:7, diameterBottom: 7, height: 10, tessellation: 96}, scene);
@@ -174,6 +219,12 @@ const torus2 = BABYLON.MeshBuilder.CreateTorus("torus2", {thickness: 0.7, diamet
 torus2.parent = leftarm2;
 torus2.position = new BABYLON.Vector3(0, -6.5, 0);
 
+var luce1 = BABYLON.Mesh.CreateSphere("luce1", 32, 5, scene);
+luce1.parent = torus2;
+luce1.position = new BABYLON.Vector3(0, -2.5, 0);
+
+
+
 
 var rightarm1 = BABYLON.MeshBuilder.CreateCylinder("rightarm1", {diameterTop:7, diameterBottom: 7, height: 10, tessellation: 96}, scene);
 rightarm1.rotation.x = Math.PI/2;
@@ -190,6 +241,10 @@ const torus = BABYLON.MeshBuilder.CreateTorus("torus", {thickness: 0.7, diameter
 torus.parent = rightarm2;
 torus.position = new BABYLON.Vector3(0, -6.5, 0);
 
+var luce2 = BABYLON.Mesh.CreateSphere("luce2", 32, 5, scene);
+luce2.parent = torus;
+luce2.position = new BABYLON.Vector3(0, -2.5, 0);
+
 camera.lockedTarget = anibot;
 //mapping commands
 var map = {};
@@ -201,18 +256,19 @@ scene.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionM
 }));
 
 scene.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnKeyUpTrigger, function (evt) {
-    map[evt.sourceEvent.key] = evt.sourceEvent.type == "keydown";
+    map[evt.sourceEvent.key] = evt.sourceEvent.type == "keydown ";
 }));
+
 
 
 
 scene.registerBeforeRender(function () {
 
     if ((map["w"] || map["W"])) {
-        anibot.translate(BABYLON.Axis.Z, 1, BABYLON.Space.LOCAL);
+        anibot.translate(BABYLON.Axis.X, 1, BABYLON.Space.LOCAL);
     }
     if ((map["s"] || map["S"])) {
-        anibot.translate(BABYLON.Axis.Z, -1, BABYLON.Space.LOCAL);
+        anibot.translate(BABYLON.Axis.X, -1, BABYLON.Space.LOCAL);
     }
     if ((map["a"] || map["A"])) {
         anibot.rotate(BABYLON.Axis.Y, -0.05, BABYLON.Space.LOCAL);
@@ -220,6 +276,10 @@ scene.registerBeforeRender(function () {
     if ((map["d"] || map["D"])) {
         anibot.rotate(BABYLON.Axis.Y, 0.05, BABYLON.Space.LOCAL);
     }
+    if ((map[" "])) {
+        anibot.translate(BABYLON.Axis.Y, 1, BABYLON.Space.LOCAL);
+    }
+
 });
             const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(1, 1, 0));
         
@@ -236,7 +296,7 @@ scene.registerBeforeRender(function () {
                 const ground = BABYLON.MeshBuilder.CreateBox("ground",{width:4000, height:20, depth:8000}, scene);
                 
                 ground.position = new BABYLON.Vector3(-2000, -100, 0);
-                //ground.physicsImpostor = new BABYLON.PhysicsImpostor(ground, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, restitution:0.7}, scene);
+                ground.physicsImpostor = new BABYLON.PhysicsImpostor(ground, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, restitution:0}, scene);
                 const groundMat = new BABYLON.StandardMaterial("groundMat");
                 groundMat.diffuseColor = new BABYLON.Color3.Teal();
                 var grassMaterial = new BABYLON.StandardMaterial(name + "bawl", scene);
@@ -269,20 +329,20 @@ scene.registerBeforeRender(function () {
             });
 
 
-            var dogbox = BABYLON.MeshBuilder.CreateBox("dogbox",{ height: 30, width: 50, depth: 10}, scene);
+            var dogbox = BABYLON.MeshBuilder.CreateBox("dogbox",{ height: 30, width: 50, depth: 40}, scene);
             dogbox.visibility = 0.5;
             const dog = BABYLON.SceneLoader.ImportMesh("", "./assets/bulldog/", "french_bulldog.obj", scene, function(object) {
                 // You can apply properties to object.
                 dog2 = object[0];
                 dog2.scaling = new BABYLON.Vector3(2.5, 2.5, 2.5);
-                dogbox.position.y = -85;
+                dogbox.position.y = -75;
                 dog2.rotation.z=180*Math.PI/2;
                 dog2.rotation.y=45*Math.PI/2; 
 
                 dog2.parent = dogbox;
                 
                 
-                //dogbox.physicsImpostor = new BABYLON.PhysicsImpostor(dogbox, BABYLON.PhysicsImpostor.BoxImpostor, {mass: 0, restitution: 0}, scene);
+                dogbox.physicsImpostor = new BABYLON.PhysicsImpostor(dogbox, BABYLON.PhysicsImpostor.BoxImpostor, {mass: 30, restitution: 0}, scene);
 
                 dogbox.rotate(BABYLON.Axis.Y, 3*Math.PI/2, BABYLON.Space.LOCAL);
 
