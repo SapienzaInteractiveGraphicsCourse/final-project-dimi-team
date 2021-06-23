@@ -21,23 +21,38 @@ camera.heightOffset = 10;
 camera.rotationOffset = 180;
 camera.cameraAcceleration = 0.1;
 camera.maxCameraSpeed = 100;
-//camera.lowerRadiusLimit = 40;
-//camera.upperRadiusLimit = 90;
-//camera.lowerHeightOffsetLimit = 0;
-//camera.upperHeightOffsetLimit = 80;
-//camera.lowerRotationOffsetLimit = 100;
-//camera.upperRotationOffsetLimit = 240;
-//camera.minZ = 0;
-//camera.maxZ = 270;
+camera.lowerRadiusLimit = 50;
+camera.upperRadiusLimit = 190;
+camera.lowerHeightOffsetLimit = 0;
+camera.upperHeightOffsetLimit = 180;
+camera.lowerRotationOffsetLimit = 100;
+camera.upperRotationOffsetLimit = 360;
+camera.minZ = 0;
+//camera.maxZ = 1570;
 camera.attachControl(canvas, true);
+
+
+            //Skybox
+            const skybox = BABYLON.Mesh.CreateBox("skyBox", 8000.0, scene);
+            const skyboxMaterial = new BABYLON.StandardMaterial("skyBox", scene);
+            skyboxMaterial.backFaceCulling = false;
+            skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture("textures/skybox", scene);
+            skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
+            skyboxMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
+            skyboxMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
+            skybox.material = skyboxMaterial;
+
 
 
 
 
 //ROBOT
 
-var robbox = BABYLON.MeshBuilder.CreateBox("robbox",{ height: 30, width: 50, depth: 10}, scene);
-robbox.visibility = 0.5;
+var bodycolor = new BABYLON.StandardMaterial("bodycolor", scene);
+	bodycolor.diffuseTexture =  new BABYLON.Texture("textures/bronzo.jpg", scene);
+
+var robbox = BABYLON.MeshBuilder.CreateBox("robbox",{ height: 38, width: 55, depth: 57}, scene);
+robbox.visibility = 0.1;
 
 var cub1 = BABYLON.Mesh.CreateSphere("cub1", 15, 25, scene);
 cub1.position = new BABYLON.Vector3(70, 23, 0);
@@ -52,14 +67,23 @@ var b = BABYLON.CSG.FromMesh(tot);
 //csg
 var anibot = b.intersect(a).toMesh("c", null, scene);
 
-anibot.position.x = -3100;
-anibot.position.y = -60;
-anibot.position.z = -200;
+
+anibot.position.x = 0;
+anibot.position.z = 0;
+anibot.position.y = 0;
+anibot.parent = robbox;
+robbox.physicsImpostor = new BABYLON.PhysicsImpostor(robbox, BABYLON.PhysicsImpostor.BoxImpostor, {mass: 20, restitution: 0}, scene);
+robbox.position.x = -3100;
+robbox.position.z = -180;
+robbox.position.y = -60;
+
 cub1.dispose();
 tot.dispose();
+anibot.material=bodycolor;
 
 
-//anibot.physicsImpostor = new BABYLON.PhysicsImpostor(anibot, BABYLON.PhysicsImpostor.BoxImpostor, {mass: 0.001, restitution: 0}, scene);
+
+
 const myShape = [
     new BABYLON.Vector3(0, 0, 0),
     new BABYLON.Vector3(20, 10, 0),
@@ -92,8 +116,67 @@ const anibotbot = BABYLON.SceneLoader.ImportMesh("", "./assets/elica/", "15532_P
                      
         
                     });
+    
+    var particleSystem = new BABYLON.ParticleSystem("particles", 300 , scene, null, true);
+    particleSystem.particleTexture = new BABYLON.Texture("https://raw.githubusercontent.com/PatrickRyanMS/BabylonJStextures/master/ParticleSystems/Steam/T_SteamSpriteSheet.png", scene, true, false, BABYLON.Texture.TRILINEAR_SAMPLINGMODE);
+
+    particleSystem.startSpriteCellID = 0;
+    particleSystem.endSpriteCellID = 31;
+    particleSystem.spriteCellHeight = 256;
+    particleSystem.spriteCellWidth = 128;
+    particleSystem.spriteCellChangeSpeed = 4;
+
+    particleSystem.minScaleX = 5.0;
+    particleSystem.minScaleY = 6.0;
+    particleSystem.maxScaleX = 5.0;
+    particleSystem.maxScaleY = 6.0;
+
+    particleSystem.addSizeGradient(0, 0, 0);
+    particleSystem.addSizeGradient(1, 1, 1);
+
+    particleSystem.translationPivot = new BABYLON.Vector2(0.1, 0.8);
+
+
+
+    // Where the particles come from
+    var radius = 1;
+    var angle = Math.PI;
+    var coneEmitter = new BABYLON.ConeParticleEmitter(radius, angle);
+
+    particleSystem.particleEmitterType = coneEmitter;
+    particleSystem.emitter= ani;
+
+    // Life time of each particle (random between...
+    particleSystem.minLifeTime = 4.0;
+    particleSystem.maxLifeTime = 4.0;
+
+    // Color gradient over life
+    particleSystem.addColorGradient(0, new BABYLON.Color4(1, 1, 1, 0));
+    particleSystem.addColorGradient(0.5, new BABYLON.Color4(1, 1, 1, 70/255));
+    particleSystem.addColorGradient(1.0, new BABYLON.Color4(1, 1, 1, 0));
+
+    // Emission rate
+    particleSystem.emitRate = 6 ;
+
+    // Blend mode : BLENDMODE_ONEONE, or BLENDMODE_STANDARD
+    particleSystem.blendMode = BABYLON.ParticleSystem.BLENDMODE_ADD;
+
+    // Set the gravity of all particles
+    particleSystem.gravity = new BABYLON.Vector3(0, 0, 0);
+
+    // Speed
+    particleSystem.minEmitPower = 0;
+    particleSystem.maxEmitPower = 1 ;
+    particleSystem.updateSpeed = 0.3;
+    
+
+    // Start the particle system
+    particleSystem.start();
+
+
    });
    anibotbot.parent = anibot;
+
    
 
 var planeOpts = {
@@ -104,55 +187,77 @@ var planeOpts = {
 var schermo = BABYLON.MeshBuilder.CreatePlane("plane", planeOpts, scene);
 schermo.parent = anibot;
 schermo.position= new BABYLON.Vector3(7.6,0, 0);
-schermo.rotation.y = Math.PI/2;
+schermo.rotation.y = -Math.PI/2;
 var schermoMat = new BABYLON.StandardMaterial("m", scene);
-	var schermoVidTex = new BABYLON.VideoTexture("vidtex","textures/gatos_.mp4", scene);
+	var schermoVidTex = new BABYLON.VideoTexture("vidtex","textures/hello.mp4", scene);
+    schermoVidTex.video.muted = true;
 	schermoMat.diffuseTexture = schermoVidTex;
 	schermoMat.roughness = 1;
 	schermoMat.emissiveColor = new BABYLON.Color3.White();
 	schermo.material = schermoMat;
 	scene.onPointerObservable.add(function(evt){
-			if(evt.pickInfo.pickedMesh === schermo){
-                //console.log("picked");
+			/*if(evt.pickInfo.pickedMesh === schermo){
 					if(schermoVidTex.video.paused)
 						schermoVidTex.video.play();
 					else
 						schermoVidTex.video.pause();
                     console.log(schermoVidTex.video.paused?"paused":"playing");
-			}
+			}*/
 	}, BABYLON.PointerEventTypes.POINTERPICK);
-    //console.log(schermo);
 
-var robhead = BABYLON.Mesh.CreateSphere("robhead", 32, 10, scene);
+
+var headcolor = new BABYLON.StandardMaterial("headcolor", scene);
+headcolor.diffuseTexture =  new BABYLON.Texture("textures/testa.jpg", scene);
+
+var robhead = BABYLON.Mesh.CreateSphere("robhead", 42, 10, scene);
 robhead.parent = anibot;
 robhead.position.y = 8;
+robhead.material=headcolor;
+
+
+var eyecolor = new BABYLON.StandardMaterial("eyecolor", scene);
+eyecolor.emissiveColor=new BABYLON.Vector3(0,1,1);
 
 var robeye = BABYLON.Mesh.CreateSphere("robeye", 2, 2, scene);
 robeye.parent = robhead;
 robeye.position = new BABYLON.Vector3(3,3, 2);
+robeye.material=eyecolor;
+
 
 var robeye2 = BABYLON.Mesh.CreateSphere("robeye2", 2, 2, scene);
 robeye2.parent = robhead;
 robeye2.position = new BABYLON.Vector3(3,3, -2);
+robeye2.material=eyecolor;
 
+var antennacolor = new BABYLON.StandardMaterial("antennacolor", scene);
+
+
+var cilindro = new BABYLON.StandardMaterial("cilindro", scene);
+cilindro.diffuseTexture =  new BABYLON.Texture("textures/antenna.jpg", scene);
 
 var antenna = BABYLON.MeshBuilder.CreateCylinder("antenna", {diameterTop:1, diameterBottom: 1, height: 5, tessellation: 96}, scene);
 antenna.parent = robhead;
 antenna.position = new BABYLON.Vector3(0, 5, 0);
+antenna.material=cilindro;
+
 var robheadsphere = BABYLON.Mesh.CreateSphere("robheadsphere", 2, 2, scene);
 robheadsphere.parent = robhead;
 robheadsphere.position = new BABYLON.Vector3(0, 8, 0);
 
 
 
+var elicacolor = new BABYLON.StandardMaterial("elicacolor", scene);
+	elicacolor.diffuseTexture =  new BABYLON.Texture("textures/rosso.jpg", scene);
 const baselica = new BABYLON.MeshBuilder.CreateCapsule("baselica", {radius:2.5, capSubdivisions: 6, subdivisions:6, tessellation:36, height:20}, scene)
 baselica.parent = anibot;
 baselica.position.x = -10;
 baselica.rotation.z = Math.PI/2;
+baselica.material=elicacolor;
 
 var sphelica = BABYLON.Mesh.CreateSphere("robhead", 32, 5, scene);
 sphelica.parent = baselica;
 sphelica.position.y = 8;
+
 
 const elica = BABYLON.MeshBuilder.CreateSphere("elica", {arc: 0.3, sideOrientation: BABYLON.Mesh.DOUBLESIDE,diameterX: 8, diameterY: 3.5, diameterZ: 3.5});
 elica.parent = sphelica;
@@ -161,6 +266,7 @@ elica.position.x = 5;
 elica.rotation.z = 180*Math.PI/2;
 elica.rotation.y = 90*Math.PI/2;
 elica.rotation.x = Math.PI/2;
+elica.material=elicacolor;
 
 const elica2 = BABYLON.MeshBuilder.CreateSphere("elica2", {arc: 0.3, sideOrientation: BABYLON.Mesh.DOUBLESIDE,diameterX: 8, diameterY: 3.5, diameterZ: 3.5});
 elica2.parent = sphelica;
@@ -170,6 +276,7 @@ elica2.position.z = -5;
 elica2.rotation.z = 90*Math.PI/2;
 elica2.rotation.y = Math.PI/2;
 elica2.rotation.x = Math.PI/2;
+elica2.material=elicacolor;
 
 const elica3 = BABYLON.MeshBuilder.CreateSphere("elica3", {arc: 0.3, sideOrientation: BABYLON.Mesh.DOUBLESIDE,diameterX: 8, diameterY: 3.5, diameterZ: 3.5});
 elica3.parent = sphelica;
@@ -180,6 +287,7 @@ elica3.rotation.z = 90*Math.PI/2;
 elica3.rotation.y = -Math.PI/2;
 elica3.rotation.z = 90*Math.PI/2;
 elica3.rotation.x = Math.PI/2;
+elica3.material=elicacolor;
 
 const elica4 = BABYLON.MeshBuilder.CreateSphere("elica4", {arc: 0.3, sideOrientation: BABYLON.Mesh.DOUBLESIDE,diameterX: 8, diameterY: 3.5, diameterZ: 3.5});
 elica4.parent = sphelica;
@@ -188,13 +296,43 @@ elica4.position.x = -5;
 elica4.rotation.z = 90*Math.PI/2;
 elica4.rotation.y = 90*Math.PI/2;
 elica4.rotation.x = Math.PI/2;
-
+elica4.material=elicacolor;
 var a = 0;
 
 // Code in this function will run ~60 times per second
 scene.registerBeforeRender(function () {
     a +=0.005;
+        if( avanti){
         sphelica.rotation.y += 0.5;
+        leftarm2.rotation.z = -1;
+        rightarm2.rotation.z = -1;
+        luce.emissiveColor = new BABYLON.Color3(0,1,0);
+       /* luce1.material=luce;
+        luce2.material=luce;
+        sphelica.material=luce;*/
+
+
+        if(sopra){
+            antennacolor.emissiveColor=new BABYLON.Vector3(1,0.4,0);
+            robheadsphere.material=antennacolor;
+        }
+        }
+        else {
+            if(leftarm2.rotation.z <0) leftarm2.rotation.z += 0.1;
+            if(rightarm2.rotation.z <0) rightarm2.rotation.z += 0.1;
+
+            luce.emissiveColor = new BABYLON.Color3(1,0,0);
+        luce1.material=luce;
+        luce2.material=luce;
+        sphelica.material=luce;
+        antennacolor.emissiveColor=new BABYLON.Vector3(1,1,0);
+        robheadsphere.material=antennacolor;
+        if(sopra){
+            antennacolor.emissiveColor=new BABYLON.Vector3(1,0.4,0);
+            robheadsphere.material=antennacolor;
+        }
+        }
+        
         //anibotbot.rotation.y-=0.05;
        // anibotbot.rotate(new BABYLON.Vector3 (0.1,1.2,0.1), 0.15, BABYLON.Space.LOCAL); 
 
@@ -203,25 +341,39 @@ scene.registerBeforeRender(function () {
 
 });
 
+var armcolor2 = new BABYLON.StandardMaterial("armcolor2", scene);
+armcolor2.diffuseTexture =  new BABYLON.Texture("textures/arm2.jpg", scene);
 
 var leftarm1 = BABYLON.MeshBuilder.CreateCylinder("leftarm1", {diameterTop:7, diameterBottom: 7, height: 10, tessellation: 96}, scene);
 leftarm1.rotation.x = Math.PI/2;
 leftarm1.parent = anibot;
 leftarm1.position = new BABYLON.Vector3(0, 0, -15);
+leftarm1.material=armcolor2;
+
+var armcolor = new BABYLON.StandardMaterial("armcolor", scene);
+armcolor.diffuseTexture =  new BABYLON.Texture("textures/arm.jpg", scene);
+
 
 
 var leftarm2 = new BABYLON.MeshBuilder.CreateCapsule("capsule", {radius:2, capSubdivisions: 1, height:15, tessellation:4, topCapSubdivisions:12});
 leftarm2.parent = leftarm1;
 leftarm2.rotation.x = -Math.PI/2;
 leftarm2.position = new BABYLON.Vector3(0, -7, 0);
+leftarm2.material=armcolor;
 
-const torus2 = BABYLON.MeshBuilder.CreateTorus("torus2", {thickness: 0.7, diameter: 5.5});
+var toruscolor = new BABYLON.StandardMaterial("toruscolor", scene);
+toruscolor.diffuseTexture =  new BABYLON.Texture("textures/torus.jpg", scene);
+
+const torus2 = BABYLON.MeshBuilder.CreateTorus("torus2", {thickness: 1.5, diameter: 5.5});
 torus2.parent = leftarm2;
 torus2.position = new BABYLON.Vector3(0, -6.5, 0);
+torus2.material=toruscolor;
 
 var luce1 = BABYLON.Mesh.CreateSphere("luce1", 32, 5, scene);
 luce1.parent = torus2;
 luce1.position = new BABYLON.Vector3(0, -2.5, 0);
+var luce = new BABYLON.StandardMaterial("luce", scene);
+
 
 
 
@@ -230,16 +382,22 @@ var rightarm1 = BABYLON.MeshBuilder.CreateCylinder("rightarm1", {diameterTop:7, 
 rightarm1.rotation.x = Math.PI/2;
 rightarm1.parent = anibot;
 rightarm1.position = new BABYLON.Vector3(0, 0, 15);
+rightarm1.material=armcolor2;
 
 
 var rightarm2 =new BABYLON.MeshBuilder.CreateCapsule("capsule", {radius:2, capSubdivisions: 1, height:15, tessellation:4, topCapSubdivisions:12});
 rightarm2.parent = rightarm1;
 rightarm2.rotation.x = -Math.PI/2;
 rightarm2.position = new BABYLON.Vector3(0, 7, 0);
+rightarm2.material= armcolor;
 
-const torus = BABYLON.MeshBuilder.CreateTorus("torus", {thickness: 0.7, diameter: 5.5});
+var toruscolor = new BABYLON.StandardMaterial("toruscolor", scene);
+toruscolor.diffuseTexture =  new BABYLON.Texture("textures/torus.jpg", scene);
+
+const torus = BABYLON.MeshBuilder.CreateTorus("torus", {thickness: 1.5, diameter: 5.5});
 torus.parent = rightarm2;
 torus.position = new BABYLON.Vector3(0, -6.5, 0);
+torus.material=toruscolor;
 
 var luce2 = BABYLON.Mesh.CreateSphere("luce2", 32, 5, scene);
 luce2.parent = torus;
@@ -260,29 +418,58 @@ scene.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionM
 }));
 
 
-
+var avanti=false;
+var sopra=false;
 
 scene.registerBeforeRender(function () {
 
     if ((map["w"] || map["W"])) {
-        anibot.translate(BABYLON.Axis.X, 1, BABYLON.Space.LOCAL);
+        robbox.translate(BABYLON.Axis.X, 5, BABYLON.Space.LOCAL);
+        avanti=true;
+        sopra=false;
+        if ((map[" "])) {
+            robbox.translate(BABYLON.Axis.Y, 1, BABYLON.Space.LOCAL);
+            sopra=true;
+        }
     }
+    else avanti=false;
     if ((map["s"] || map["S"])) {
-        anibot.translate(BABYLON.Axis.X, -1, BABYLON.Space.LOCAL);
+        robbox.translate(BABYLON.Axis.X, -1, BABYLON.Space.LOCAL);
+        sopra=false;
+        if ((map[" "])) {
+            robbox.translate(BABYLON.Axis.Y, 1, BABYLON.Space.LOCAL);
+            sopra=true;
+        }
     }
     if ((map["a"] || map["A"])) {
-        anibot.rotate(BABYLON.Axis.Y, -0.05, BABYLON.Space.LOCAL);
+        robbox.rotate(BABYLON.Axis.Y, -0.05, BABYLON.Space.LOCAL);
+        sopra=false;
+        if ((map[" "])) {
+            robbox.translate(BABYLON.Axis.Y, 1, BABYLON.Space.LOCAL);
+            sopra=true;
+        }
     }
     if ((map["d"] || map["D"])) {
-        anibot.rotate(BABYLON.Axis.Y, 0.05, BABYLON.Space.LOCAL);
+        robbox.rotate(BABYLON.Axis.Y, 0.05, BABYLON.Space.LOCAL);
+        sopra=false;
+        if ((map[" "])) {
+            robbox.translate(BABYLON.Axis.Y, 1, BABYLON.Space.LOCAL);
+            sopra=true;
+        }
     }
     if ((map[" "])) {
-        anibot.translate(BABYLON.Axis.Y, 1, BABYLON.Space.LOCAL);
+        robbox.translate(BABYLON.Axis.Y, 1, BABYLON.Space.LOCAL);
+        sopra=true;
     }
+    else sopra=false;
 
 });
-            const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(1, 1, 0));
-        
+            const light = new BABYLON.DirectionalLight("light", new BABYLON.Vector3(0, -1, 1),scene);
+            light.position = new BABYLON.Vector3(0, 80, -200);
+            light.intensity = 0.8;
+
+            // Shadow generator
+          
             var cowsound = new BABYLON.Sound("cow2", "sounds/cow2.wav", scene);
             var dogsound = new BABYLON.Sound("dog", "sounds/dog.wav", scene);
             var catsound = new BABYLON.Sound("hana", "sounds/hana.wav", scene);
@@ -294,6 +481,7 @@ scene.registerBeforeRender(function () {
 
                 //Grass
                 const ground = BABYLON.MeshBuilder.CreateBox("ground",{width:4000, height:20, depth:8000}, scene);
+                ground.receiveShadows = true;
                 
                 ground.position = new BABYLON.Vector3(-2000, -100, 0);
                 ground.physicsImpostor = new BABYLON.PhysicsImpostor(ground, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, restitution:0}, scene);
@@ -309,10 +497,53 @@ scene.registerBeforeRender(function () {
     const largeGroundMat = new BABYLON.StandardMaterial("largeGroundMat");
     largeGroundMat.diffuseTexture = new BABYLON.Texture("https://assets.babylonjs.com/environments/valleygrass.png");
     
-    const largeGround = BABYLON.MeshBuilder.CreateGroundFromHeightMap("largeGround", "https://assets.babylonjs.com/environments/villageheightmap.png", {width:4000, height:8000, subdivisions: 15, minHeight:70, maxHeight: 0});
+    const largeGround = BABYLON.MeshBuilder.CreateGroundFromHeightMap("largeGround", "https://assets.babylonjs.com/environments/villageheightmap.png", {width:4000, height:8000, subdivisions: 15, minHeight:7, maxHeight: 0});
+    const largegroundbox = BABYLON.MeshBuilder.CreateBox("ground",{width:4000, height:20, depth:8000}, scene); 
+    largegroundbox.visibility = 0;
     largeGround.material = largeGroundMat;
-    largeGround.position.y = -100;
-    largeGround.position = new BABYLON.Vector3(2000, -100, 0);
+    largeGround.position.y=-4;
+    largeGround.parent=largegroundbox;
+    largegroundbox.position = new BABYLON.Vector3(2000, -100, 0);
+    largegroundbox.physicsImpostor = new BABYLON.PhysicsImpostor(largegroundbox, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, restitution:0}, scene);
+
+    // Ground
+	var riverMaterial= new BABYLON.StandardMaterial("riverMaterial", scene);
+	riverMaterial.diffuseTexture = new BABYLON.Texture("textures/ground.jpg", scene);
+	riverMaterial.diffuseTexture.uScale = riverMaterial.diffuseTexture.vScale = 4;
+	
+	var river = BABYLON.Mesh.CreateGround("river", 600, 1800, 32, scene, false);
+    river.position = new BABYLON.Vector3(3000, -100, 0);
+	river.material = riverMaterial;
+		
+	// Water
+	var waterMesh = BABYLON.Mesh.CreateGround("waterMesh", 600, 1800, 32, scene, false);
+	
+	var water = new BABYLON.WaterMaterial("water", scene);
+	water.bumpTexture = new BABYLON.Texture("textures/waterbump.png", scene);
+	
+	// Water properties
+	water.windForce = -15;
+	water.waveHeight = 1.5;
+	water.windDirection = new BABYLON.Vector2(1, 1);
+	water.waterColor = new BABYLON.Color3(0.1, 0.1, 0.6);
+	water.colorBlendFactor = 0.3;
+	water.bumpHeight = 0.4;
+	water.waveLength = 0.2;
+
+	
+	// Add skybox and ground to the reflection and refraction
+	water.addToRenderList(skybox);
+	water.addToRenderList(river);
+	
+	// Assign the water material
+	waterMesh.material = water;
+    waterMesh.position = new BABYLON.Vector3(3000, -100, 0);
+
+
+    const shadowGenerator = new BABYLON.ShadowGenerator(512, light);
+    shadowGenerator.useBlurExponentialShadowMap = true;
+    shadowGenerator.addShadowCaster(anibot);
+
 
 
             const cat = BABYLON.SceneLoader.ImportMesh("", "./assets/cat/", "cat.obj", scene, function(object) {
@@ -604,18 +835,6 @@ scene.registerBeforeRender(function () {
             });
             
          
-
-            //Skybox
-                const skybox = BABYLON.Mesh.CreateBox("skyBox", 8000.0, scene);
-                const skyboxMaterial = new BABYLON.StandardMaterial("skyBox", scene);
-                skyboxMaterial.backFaceCulling = false;
-                skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture("textures/skybox", scene);
-                skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
-                skyboxMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
-                skyboxMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
-                skybox.material = skyboxMaterial;
- 
-
 
 
             
