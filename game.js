@@ -69,9 +69,6 @@ const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 100, 
             skyboxMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
             skybox.material = skyboxMaterial;
 
-
-
-
             var box = BABYLON.MeshBuilder.CreateBox("box",{ height: 110, width: 100, depth: 5000}, scene);
             box.visibility = 0;
             
