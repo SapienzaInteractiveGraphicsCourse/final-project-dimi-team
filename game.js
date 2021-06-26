@@ -16,7 +16,7 @@ scene.enablePhysics(gravityVector, physicsPlugin);
 var physicsViewer = new BABYLON.Debug.PhysicsViewer();
 var physicsHelper = new BABYLON.PhysicsHelper(scene);  
 var camera = new BABYLON.FollowCamera("FollowCam", new BABYLON.Vector3(-40, 10, 0), scene);
-camera.radius = 70;
+camera.radius = 150;
 camera.heightOffset = 10;
 camera.rotationOffset = 270;
 camera.cameraAcceleration = 0.1;
@@ -26,7 +26,7 @@ camera.upperRadiusLimit = 190;
 camera.lowerHeightOffsetLimit = 0;
 camera.upperHeightOffsetLimit = 180;
 camera.lowerRotationOffsetLimit = 10;
-camera.upperRotationOffsetLimit = 350;
+camera.upperRotationOffsetLimit = 320;
 camera.minZ = 0;
 //camera.maxZ = 3570;
 camera.attachControl(canvas, true);
@@ -39,23 +39,25 @@ const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 100, 
 
             light.setEnabled(false);
 
-            const light1 = new BABYLON.DirectionalLight("light1", new BABYLON.Vector3(0, -1, 0),scene);
+            const light1 = new BABYLON.DirectionalLight("light1", new BABYLON.Vector3(0, -1, 0.2),scene);
             light1.position = new BABYLON.Vector3(-3800, 100, -200);
             light1.diffuse = new BABYLON.Color3(1, 1, 1);
             light1.specular = new BABYLON.Color3(0, 0, 0);
-            light1.intensity = 0.5;
+            light1.intensity = 0.1;
 
             light1.setEnabled(false);
             
 
 
 
-            const light2 = new BABYLON.DirectionalLight("light2", new BABYLON.Vector3(0, -1, 0.5),scene);
-            light2.position = new BABYLON.Vector3(0, 100, 0);
+            const light2 = new BABYLON.DirectionalLight("light2", new BABYLON.Vector3(0, -1, 1),scene);
+            light2.position = new BABYLON.Vector3(0, 100, -200);
             light2.diffuse = new BABYLON.Color3(1, 1, 1);
             light2.specular = new BABYLON.Color3(0, 0, 0);
-            light2.intensity = 0.78;
+            light2.intensity = 0.85;
             light2.setEnabled(false);
+
+
 
 
             //Skybox
@@ -101,8 +103,8 @@ anibot.position.z = 0;
 anibot.position.y = 5.5;
 anibot.parent = robbox;
 robbox.physicsImpostor = new BABYLON.PhysicsImpostor(robbox, BABYLON.PhysicsImpostor.BoxImpostor, {mass: 50,friction:1.5,  restitution: 0}, scene);
-robbox.position.x = -3100;
-robbox.position.z = -180;
+robbox.position.x = -250;
+robbox.position.z = 1900;
 robbox.position.y = -60;
 robbox.physicsImpostor.physicsBody.inertia.setZero();
     robbox.physicsImpostor.physicsBody.invInertia.setZero();
@@ -334,11 +336,12 @@ var a = 0;
 // Code in this function will run ~60 times per second
 scene.registerBeforeRender(function () {
     a +=0.005;
-    if (robbox.position.x<=-500){
+    if (robbox.position.x<=-1000){
         light.setEnabled(true);
         light1.setEnabled(true);
+        light2.setEnabled(false);
     }
-    if (robbox.position.x>-500){
+    if (robbox.position.x>-1000){
         light.setEnabled(false);
         light1.setEnabled(false);
         light2.setEnabled(true);
@@ -532,12 +535,14 @@ scene.registerBeforeRender(function () {
             var storksound = new BABYLON.Sound("stork", "sounds/stork.wav", scene);
             var rabbitsound = new BABYLON.Sound("rabbit", "sounds/rabbit.wav", scene);
             var batsound = new BABYLON.Sound("bat", "sounds/bat.wav", scene);
+            var vulturesound = new BABYLON.Sound("bat", "sounds/vulture1.wav", scene);
+
 
                 //Grass
-                const ground = BABYLON.MeshBuilder.CreateBox("ground",{width:4000, height:20, depth:8000}, scene);
+                const ground = BABYLON.MeshBuilder.CreateBox("ground",{width:3000, height:20, depth:8000}, scene);
                 ground.receiveShadows = true;
                 
-                ground.position = new BABYLON.Vector3(-2000, -100, 0);
+                ground.position = new BABYLON.Vector3(-2500, -100, 0);
                 ground.physicsImpostor = new BABYLON.PhysicsImpostor(ground, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, restitution:0}, scene);
                 const groundMat = new BABYLON.StandardMaterial("groundMat");
                 groundMat.diffuseColor = new BABYLON.Color3.Teal();
@@ -558,7 +563,7 @@ scene.registerBeforeRender(function () {
     largeGround.material = largeGroundMat;
     largeGround.position.y=+5;
     largeGround.parent=largegroundbox;
-    largegroundbox.position = new BABYLON.Vector3(1000, -100, 0);
+    largegroundbox.position = new BABYLON.Vector3(500, -100, 0);
     largegroundbox.physicsImpostor = new BABYLON.PhysicsImpostor(largegroundbox, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, restitution:0}, scene);
 
     // Ground
@@ -566,12 +571,12 @@ scene.registerBeforeRender(function () {
 	riverMaterial.diffuseTexture = new BABYLON.Texture("textures/ground.jpg", scene);
 	riverMaterial.diffuseTexture.uScale = riverMaterial.diffuseTexture.vScale = 4;
 	
-	var river = BABYLON.Mesh.CreateGround("river", 600, 4000, 32, scene, false);
-    river.position = new BABYLON.Vector3(1500, -92, 0);
+	var river = BABYLON.Mesh.CreateGround("river", 700, 4000, 32, scene, false);
+    river.position = new BABYLON.Vector3(1450, -92, 0);
 	river.material = riverMaterial;
 		
 	// Water
-	var waterMesh = BABYLON.Mesh.CreateGround("waterMesh", 600, 4000, 32, scene, false);
+	var waterMesh = BABYLON.Mesh.CreateGround("waterMesh", 700, 4000, 32, scene, false);
 	
 	var water = new BABYLON.WaterMaterial("water", scene);
 	water.bumpTexture = new BABYLON.Texture("textures/waterbump.png", scene);
@@ -592,7 +597,7 @@ scene.registerBeforeRender(function () {
 	
 	// Assign the water material
 	waterMesh.material = water;
-    waterMesh.position = new BABYLON.Vector3(1500, -87, 0);
+    waterMesh.position = new BABYLON.Vector3(1450, -87, 0);
 
 
   const shadowGenerator = new BABYLON.ShadowGenerator(1024, light1);
@@ -602,6 +607,7 @@ scene.registerBeforeRender(function () {
     const shadowGenerator2 = new BABYLON.ShadowGenerator(1024, light2);
     shadowGenerator2.useBlurExponentialShadowMap = true;
     shadowGenerator2.addShadowCaster(anibot);
+    shadowGenerator2.setDarkness(0.9);
 
 
 
@@ -857,11 +863,11 @@ scene.registerBeforeRender(function () {
 
             const house4= BABYLON.SceneLoader.ImportMesh("", "./assets/silo/", "20954_Farm_Silo_v1_NEW.obj", scene, function(object) {
                 hous = object[0];
-                hous.scaling = new BABYLON.Vector3(40, 40, 40);
+                hous.scaling = new BABYLON.Vector3(20, 20, 20);
                 hous.rotation.z=90*Math.PI/2;
                 hous.rotation.y=135*Math.PI/2;
                 hous.rotation.x=135*Math.PI/2;
-                hous.position = new BABYLON.Vector3(-2600, -100, -1300);
+                hous.position = new BABYLON.Vector3(-250, -100, 2000);
 
             });
 
@@ -876,6 +882,25 @@ scene.registerBeforeRender(function () {
                 var texture = new BABYLON.Texture("textures/legno2.jpg", scene);
                 mat.diffuseTexture = texture;
                 house2.material=mat;
+            });
+
+
+            const vulture= BABYLON.SceneLoader.ImportMesh("", "./assets/vulture/", "13582_GoldenVulture_V1_L3.obj", scene, function(object) {
+                // You can apply properties to object.
+                vult = object[0];
+                vult.scaling = new BABYLON.Vector3(0.3, 0.3, 0.3);
+                vult.rotation.z=135*Math.PI/2;
+                vult.rotation.y=135*Math.PI/2;
+                vult.rotation.x=135*Math.PI/2;
+                vult.position = new BABYLON.Vector3(-265, 95, 2000);
+                var mat = new BABYLON.StandardMaterial("mat", scene);
+                var texture = new BABYLON.Texture("textures/legno2.jpg", scene);
+                mat.diffuseTexture = texture;
+                vult.material=mat;
+                vult.actionManager = new BABYLON.ActionManager(scene);
+                vult.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickUpTrigger, function () {
+                    vulturesound.play();
+                }));
             });
 
             const fire= BABYLON.SceneLoader.ImportMesh("", "./assets/tree/", "fireplace.obj", scene, function(object) {
@@ -987,6 +1012,82 @@ scene.registerBeforeRender(function () {
             // Start the particle system
             fireSystem.start();
 
+            var tree = BABYLON.SceneLoader.ImportMesh("","./assets/trees/", "Tree.babylon", scene, function (meshes) {
+                var tree = meshes[0];
+                tree.scaling = new BABYLON.Vector3(500, 500, 500);
+                tree.position = new BABYLON.Vector3(0, 0, 0);
+                tree.material.opacityTexture = null;
+                tree.material.backFaceCulling = false;
+            
+                for(i=0; i < 4; i++){
+                    for(j = 0; j <= 8; j++){
+                        if(i%2==0){
+                            var tree2 = tree.createInstance("");
+                            tree2.position.x = -1000 + (i*150);
+                            tree2.position.z = 250 + (j*250);
+                            tree2.position.y = -99;
+                            var tree3 = tree.createInstance("");
+                            tree3.position.x = -1000 + (i*240);
+                            tree3.position.z = -250 - (j*250);
+                            tree3.position.y = -99;
+                        }
+                        else{
+                            var tree2 = tree.createInstance("");
+                            tree2.position.x = -1000 + (i*150);
+                            tree2.position.z = 180 + (j*150);
+                            tree2.position.y = -99;
+                            var tree3 = tree.createInstance("");
+                            tree3.position.x = -1000 + (i*240);
+                            tree3.position.z = -280 - (j*150);
+                            tree3.position.y = -99;
+                        }
+                    }
+            
+                }
+
+                for(i=0; i < 3; i++){
+                    for(j = 0; j <= 8; j++){
+                        if(j%2==0){
+                           
+                            var tree3 = tree.createInstance("");
+                            tree3.position.x = -50 + (i*300);
+                            tree3.position.z = 250 + (j*150);
+                            tree3.position.y = -99;
+                        }
+                        else{
+                            
+                            var tree3 = tree.createInstance("");
+                            tree3.position.x = -50 + (i*180);
+                            tree3.position.z = 250 + (j*150);
+                            tree3.position.y = -99;
+                        }
+                    }
+            
+                }
+
+                for(i=0; i < 3; i++){
+                    for(j = 0; j <= 8; j++){
+                        if(j%2==0){
+                           
+                            var tree3 = tree.createInstance("");
+                            tree3.position.x = -350 + (i*300);
+                            tree3.position.z = -250 - (j*150);
+                            tree3.position.y = -99;
+                        }
+                        else{
+                            
+                            var tree3 = tree.createInstance("");
+                            tree3.position.x = -350 + (i*180);
+                            tree3.position.z = -250 - (j*150);
+                            tree3.position.y = -99;
+                        }
+                    }
+            
+                }
+               
+                tree.isVisible = false;
+            });
+            
            
             return scene;
         };
