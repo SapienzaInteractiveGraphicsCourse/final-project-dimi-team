@@ -65,8 +65,8 @@ advancedTexture1.addControl(title);
 
 var testo = new BABYLON.GUI.TextBlock();
 testo.fontSize = 20;
-testo.height = 0.45;
-testo.text = "Hi!\nDiscover the nature togheter with Anibot.\n Click on the animals to listen their sounds!\n Commands: \n W=forward\nS=back\n A=left\nD=right\nSPACE=up\n";
+testo.height = 0.35;
+testo.text = "Hi!\nDiscover the nature togheter with Anibot.\n Click on the animals to listen their sounds!\n Commands: \n W=forward\nS=back\n A=left\nD=right\nSPACE=up\nY=On/Off Music";
 testo.color = "Black";
 testo.top = "230px";
 testo.fontFamily = "open sans";
@@ -1113,8 +1113,8 @@ scene.registerBeforeRender(function () {
                     if(rabbitbox.position.x>-3000 && vai){
                     if (rabbitbox.position.y < -40 && direction) {
                         // Increment box position to the right
-                        rabbitbox.position.y += 1;
-                        rabbitbox.position.x -= 1;
+                        rabbitbox.position.y += 0.8;
+                        rabbitbox.position.x -= 0.8;
                     }
                     else {
                         // Swap directions to move left
@@ -1124,8 +1124,8 @@ scene.registerBeforeRender(function () {
                     // Check if box is moving left
                     if (rabbitbox.position.y > -80 && !direction) {
                         // Decrement box position to the left
-                        rabbitbox.position.y -= 1;
-                        rabbitbox.position.x -= 1;
+                        rabbitbox.position.y -= 0.8;
+                        rabbitbox.position.x -= 0.8;
                     }
                     else {
                         // Swap directions to move right
