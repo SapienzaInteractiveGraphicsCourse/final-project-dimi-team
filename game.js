@@ -7,6 +7,93 @@ var sceneToRender = null;
 
 var createDefaultEngine = function() { return new BABYLON.Engine(canvas, true, { preserveDrawingBuffer: true, stencil: true,  disableWebGL2Support: false}); };
 
+
+var engine = new BABYLON.Engine(canvas, true);
+let engineScale = Math.min(window.devicePixelRatio,1.5);
+//loading screen
+
+
+//loading screen
+var loadingScreenDiv = window.document.getElementById("loadingScreen");
+
+function customLoadingScreen() {
+}
+customLoadingScreen.prototype.displayLoadingUI = function () {
+    loadingScreenDiv.style.display = "inline";
+    loadingScreenDiv.innerHTML = "Loading:     " + (100 - scene.getWaitingItemsCount()) + "%";
+};
+customLoadingScreen.prototype.hideLoadingUI = function () {
+    loadingScreenDiv.style.display = "none";
+};
+var loadingScreen = new customLoadingScreen();
+engine.loadingScreen = loadingScreen;
+        
+var clicks = 0;
+
+
+//Main Menu
+
+var scene0 = new BABYLON.Scene(engine);
+scene0.createDefaultEnvironment();
+scene0.clearColor = new BABYLON.Color3(0.8, 0.7,0, 0.2);
+var menulight = new BABYLON.PointLight("spot1", new BABYLON.Vector3(-20, 5, 10), scene0);
+menulight.diffuse = new BABYLON.Color3(0, 1, 1);
+menulight.specular = new BABYLON.Color3(0, 0, 0);
+menulight.intensity = 1;
+var camera1 = new BABYLON.FollowCamera("FollowCam", new BABYLON.Vector3(-40, 10, 0), scene0);
+camera1.radius = 15;
+camera1.heightOffset = 5;
+camera1.rotationOffset = 0;
+camera1.cameraAcceleration = 0.1;
+camera1.maxCameraSpeed = 100;
+camera1.lowerRadiusLimit = 0;
+camera1.lowerHeightOffsetLimit = 0;
+camera1.upperHeightOffsetLimit = 80;
+camera1.attachControl(canvas, true);
+
+var advancedTexture1 = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI1", true, scene0);
+
+var title = new BABYLON.GUI.TextBlock();
+title.fontSize = 150;
+title.height = 0.2;
+title.text = "ANIBOT";
+title.color = "Green";
+title.top = "50px";
+title.fontFamily = "open sans";
+title.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
+advancedTexture1.addControl(title); 
+
+var testo = new BABYLON.GUI.TextBlock();
+testo.fontSize = 20;
+testo.height = 0.45;
+testo.text = "Hi!\nDiscover the nature togheter with Anibot.\n Click on the animals to listen their sounds!\n Commands: \n W=forward\nS=back\n A=left\nD=right\nSPACE=up\n";
+testo.color = "Black";
+testo.top = "230px";
+testo.fontFamily = "open sans";
+testo.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
+advancedTexture1.addControl(testo); 
+
+var start = BABYLON.GUI.Button.CreateSimpleButton("but", "START");
+start.width = "150px";
+start.height = "70px";
+start.top = "200";
+start.left = "0";
+start.color = "red";
+start.cornerRadius = 40;
+start.textBlock.border= "10px" 
+
+start.textBlock.color = "red";
+start.textBlock.fontSize="35px";
+start.textBlock.fontFamily = "Lucida Console";
+start.background = "white";
+advancedTexture1.addControl(start);
+
+
+start.onPointerUpObservable.add(function () {       
+    clicks ++;
+                
+});
+
 var createScene = function () {
             var scene = new BABYLON.Scene(engine);
             //physics
@@ -17,7 +104,7 @@ var physicsViewer = new BABYLON.Debug.PhysicsViewer();
 var physicsHelper = new BABYLON.PhysicsHelper(scene);  
 var camera = new BABYLON.FollowCamera("FollowCam", new BABYLON.Vector3(-40, 10, 0), scene);
 camera.radius = 150;
-camera.heightOffset = 10;
+camera.heightOffset = 50;
 camera.rotationOffset = 270;
 camera.cameraAcceleration = 0.1;
 camera.maxCameraSpeed = 100;
@@ -99,13 +186,19 @@ const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 100, 
             box5.visibility = 0;
             box5.physicsImpostor = new BABYLON.PhysicsImpostor(box5, BABYLON.PhysicsImpostor.BoxImpostor, {mass: 1000, friction:100, restitution: 0}, scene);
             box5.position = new BABYLON.Vector3(-250, 100, 1980);
+
+            var box6 = BABYLON.MeshBuilder.CreateBox("box",{ height: 300, width: 100, depth: 5000}, scene);
+            box6.visibility = 0;
+            box6.physicsImpostor = new BABYLON.PhysicsImpostor(box6, BABYLON.PhysicsImpostor.BoxImpostor, {mass: 1000, friction:100, restitution: 0}, scene);
+            box6.position = new BABYLON.Vector3(-3800, 100, 0);
+
 //ROBOT
 
 var bodycolor = new BABYLON.StandardMaterial("bodycolor", scene);
 	bodycolor.diffuseTexture =  new BABYLON.Texture("textures/bronzo.jpg", scene);
 
 var robbox = BABYLON.MeshBuilder.CreateBox("robbox",{ height: 38, width: 55, depth: 57}, scene);
-robbox.visibility = 0.1;
+robbox.visibility = 0;
 
 var cub1 = BABYLON.Mesh.CreateSphere("cub1", 15, 25, scene);
 cub1.position = new BABYLON.Vector3(70, 23, 0);
@@ -126,7 +219,7 @@ anibot.position.z = 0;
 anibot.position.y = 5.5;
 anibot.parent = robbox;
 robbox.physicsImpostor = new BABYLON.PhysicsImpostor(robbox, BABYLON.PhysicsImpostor.BoxImpostor, {mass: 50,friction:1.5,  restitution: 0}, scene);
-robbox.position.x = 900;
+robbox.position.x = -3250;
 robbox.position.z = 0;
 robbox.position.y = 0;
 robbox.physicsImpostor.physicsBody.inertia.setZero();
@@ -454,6 +547,12 @@ scene.registerBeforeRender(function () {
        }
        else advancedTexture.removeControl(labelfox);
 
+       if(Math.abs(dogbox.position.x-robbox.position.x)<550 ){
+        advancedTexture.addControl(labeldog);
+        labeldog.linkWithMesh(dogbox);
+       }
+       else advancedTexture.removeControl(labeldog);
+
        if(Math.abs(rabbitbox.position.x-robbox.position.x)<550 ){
         advancedTexture.addControl(labelrabbit);
         labelrabbit.linkWithMesh(rabbitbox);
@@ -566,13 +665,23 @@ scene.registerBeforeRender(function () {
         robbox.translate(BABYLON.Axis.X, 4, BABYLON.Space.LOCAL);
         avanti=true;
         sopra=false;
-        console.log(robbox.position.x);
+        console.log(robbox.position.z);
         if ((map[" "])) {
             robbox.translate(BABYLON.Axis.Y, 1, BABYLON.Space.LOCAL);
             sopra=true;
         }
     }
     else avanti=false;
+
+    if ((map["Y"] || map["y"])) {
+        if(music.isPlaying ){
+            music.pause();
+        }
+        if(!music.isPlaying ){
+            music.play();
+        }
+    }
+
     if ((map["s"] || map["S"])) {
         robbox.translate(BABYLON.Axis.X, -4, BABYLON.Space.LOCAL);
         sopra=false;
@@ -610,7 +719,7 @@ scene.registerBeforeRender(function () {
             
 
             // Shadow generator
-          
+            var music = new BABYLON.Sound("musica", "./sounds/musica.mp3", scene, null, { volume: 0.4, loop: true, autoplay: true });
             var cowsound = new BABYLON.Sound("cow2", "sounds/cow2.wav", scene);
             var dogsound = new BABYLON.Sound("dog", "sounds/dog.wav", scene);
             var catsound = new BABYLON.Sound("hana", "sounds/hana.wav", scene);
@@ -636,6 +745,7 @@ scene.registerBeforeRender(function () {
             var labeldog = new BABYLON.GUI.TextBlock();
             labeldog.text = "Dog";
             labeldog.height = "13px";
+            labeldog.fontSize = 12;
             labeldog.color = "white";
             labeldog.fontStyle = "italic";
             labeldog.fontFamily = "Verdana";
@@ -788,7 +898,7 @@ scene.registerBeforeRender(function () {
 
 
             var catbox = BABYLON.MeshBuilder.CreateBox("cat",{ height: 5, width: 5, depth: 4}, scene);
-            catbox.visibility = 0.8;
+            catbox.visibility = 0;
             const cat = BABYLON.SceneLoader.ImportMesh("", "./assets/cat/", "cat.obj", scene, function(object) {
              // You can apply properties to object.
              cat2 = object[0];
@@ -798,8 +908,8 @@ scene.registerBeforeRender(function () {
              catbox.position.y=-80;
              cat2.parent=catbox;
              catbox.physicsImpostor = new BABYLON.PhysicsImpostor(catbox, BABYLON.PhysicsImpostor.BoxImpostor, {mass: 500, friction:1000,restitution: 0}, scene);
-             catbox.position.x=-3400;
-             catbox.position.z=600;
+             catbox.position.x=-1820;
+             catbox.position.z=380;
              cat2.position.y=10;
              cat2.actionManager = new BABYLON.ActionManager(scene);
              cat2.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickUpTrigger, function () {
@@ -808,13 +918,13 @@ scene.registerBeforeRender(function () {
             });
 
 
-            var dogbox = BABYLON.MeshBuilder.CreateBox("dogbox",{ height: 30, width: 50, depth: 40}, scene);
-            dogbox.visibility = 0.5;
+            var dogbox = BABYLON.MeshBuilder.CreateBox("dogbox",{ height: 3, width: 5, depth: 4}, scene);
+            dogbox.visibility = 0;
             const dog = BABYLON.SceneLoader.ImportMesh("", "./assets/bulldog/", "french_bulldog.obj", scene, function(object) {
                 // You can apply properties to object.
                 dog2 = object[0];
                 dog2.scaling = new BABYLON.Vector3(2.5, 2.5, 2.5);
-                dogbox.position.y = -75;
+                dogbox.position.y = -65;
                 dog2.rotation.z=180*Math.PI/2;
                 dog2.rotation.y=45*Math.PI/2; 
 
@@ -828,6 +938,7 @@ scene.registerBeforeRender(function () {
                 dogbox.position.x = -3060;
                 dogbox.position.z = -330;
                 
+                
                 dog2.actionManager = new BABYLON.ActionManager(scene);
                 dog2.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickUpTrigger, function () {
                     
@@ -840,24 +951,26 @@ scene.registerBeforeRender(function () {
                 if (dogbox.position.z < -250 && dogbox.position.x<=-3059) {
                     // Increment box position to the right
                     dogbox.position.z += 1;
-                    dogbox.rotation.y=180*Math.PI/2;
+                    dog2.rotation.y=45*Math.PI/2;
                 }
         
                 // Check if box is moving left
                 if (dogbox.position.z >= -250 ) {
                     // Decrement box position to the left
                     dogbox.position.x += 1;
-                    dogbox.rotation.y=45*Math.PI/2;
+                    dog2.rotation.y= 270*Math.PI/2;
+                    
                 }
                 if (dogbox.position.x > -2900 ) {
                  // Decrement box position to the left
                  dogbox.position.z -= 1;
-                 dogbox.rotation.y= 270*Math.PI/2;
+                 dog2.rotation.y=135*Math.PI/2;
              }
 
              if (dogbox.position.x>-3059  && dogbox.position.z <= -370) {
                  // Increment box position to the right
-                 dogbox.rotation.y=135*Math.PI/2;
+                 
+                 dog2.rotation.y=180*Math.PI/2;
                  dogbox.position.x -= 1;
                  
                  
@@ -868,29 +981,10 @@ scene.registerBeforeRender(function () {
             
                });
 
-               var cowbox = BABYLON.MeshBuilder.CreateBox("cowbox",{ height: 3, width: 5, depth: 4}, scene);
-               cowbox.visibility = 0.8;
-               const cow = BABYLON.SceneLoader.ImportMesh("", "./assets/cow/", "13085_Holsteind_v2_l3.obj", scene, function(object) {
-                // You can apply properties to object.
-                cow2 = object[0];
-                cow2.scaling = new BABYLON.Vector3(1, 1, 1);
-                cow2.rotation.z=225*Math.PI/2;
-                cow2.rotation.y=135*Math.PI/2; 
-                cow2.rotation.x=135*Math.PI/2; 
-                cowbox.position.y=-88;
-                cow2.parent=cowbox;
-                cowbox.position.x=-2900;
-                cowbox.position.z=-600;
-                cow2.position.z=-35;
-                cowbox.physicsImpostor = new BABYLON.PhysicsImpostor(cowbox, BABYLON.PhysicsImpostor.BoxImpostor, {mass: 30,friction:1000, restitution: 0}, scene);
-                cow2.actionManager = new BABYLON.ActionManager(scene);
-                cow2.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickUpTrigger, function () {
-                    cowsound.play();
-                }));
-                });
 
-                var pigbox = BABYLON.MeshBuilder.CreateBox("cowbox",{ height: 3, width: 5, depth: 4}, scene);
-                pigbox.visibility = 0.8;
+
+                var pigbox = BABYLON.MeshBuilder.CreateBox("pigbox",{ height: 3, width: 5, depth: 4}, scene);
+                pigbox.visibility = 0;
                 const pig = BABYLON.SceneLoader.ImportMesh("", "./assets/pig/", "16433_Pig.obj", scene, function(object) {
                     // You can apply properties to object.
                     pig2 = object[0];
@@ -899,8 +993,8 @@ scene.registerBeforeRender(function () {
                     pig2.rotation.y=135*Math.PI/2; 
                     pig2.rotation.x=135*Math.PI/2; 
                     pigbox.position.y=-80;
-                    pigbox.position.x=-2600;
-                    pigbox.position.z=-600;
+                    pigbox.position.x=-3100;
+                    pigbox.position.z=-700;
                     pig2.parent=pigbox;
                     pig2.position.x=-30;
                     pig2.position.Y=0;
@@ -915,8 +1009,8 @@ scene.registerBeforeRender(function () {
                 }));
                     });
 
-                    var storkbox = BABYLON.MeshBuilder.CreateBox("cowbox",{ height: 3, width: 5, depth: 4}, scene);
-                    storkbox.visibility = 0.8;
+                    var storkbox = BABYLON.MeshBuilder.CreateBox("storkbox",{ height: 3, width: 5, depth: 4}, scene);
+                    storkbox.visibility = 0;
                     const stork = BABYLON.SceneLoader.ImportMesh("", "./assets/stork/", "12980_WhiteStork_v1.obj", scene, function(object) {
                         // You can apply properties to object.
                         stork2 = object[0];
@@ -934,7 +1028,8 @@ scene.registerBeforeRender(function () {
                         }));
                         
                         });
-
+                        var barnbox = BABYLON.MeshBuilder.CreateBox("barnbox",{ height: 100, width: 300, depth: 200}, scene);
+                        barnbox.visibility = 0;
                const barn = BABYLON.SceneLoader.ImportMesh("", "./assets/barn/", "scene.gltf", scene, function(object) {
                 // You can apply properties to object.
                 barn2 = object[0];
@@ -942,12 +1037,41 @@ scene.registerBeforeRender(function () {
                 barn2.rotation.z=45*Math.PI/2;
                 barn2.rotation.y=45*Math.PI/2; 
                 barn2.rotation.x=135*Math.PI/2; 
-                barn2.position = new BABYLON.Vector3(-2500, -88,1000);
+                barnbox.position.y=-40;
+                barn2.parent=barnbox;
+                barnbox.position.z=1200;
+                barnbox.position.x=-2400;
+                barn2.position.y=-80;
+                barn2.position.x=30;
+                barn2.position.z=-50;
+                barnbox.physicsImpostor = new BABYLON.PhysicsImpostor(barnbox, BABYLON.PhysicsImpostor.BoxImpostor, {mass: 1000,friction:1000, restitution: 0}, scene);
+
                });
                
+               var cowbox = BABYLON.MeshBuilder.CreateBox("cowbox",{ height: 10, width: 50, depth: 50}, scene);
+               cowbox.visibility = 0;
+               const cow = BABYLON.SceneLoader.ImportMesh("", "./assets/cow/", "13085_Holsteind_v2_l3.obj", scene, function(object) {
+                // You can apply properties to object.
+                cow2 = object[0];
+                cow2.scaling = new BABYLON.Vector3(1, 1, 1);
+                cow2.rotation.z=225*Math.PI/2;
+                cow2.rotation.y=180*Math.PI/2; 
+                cow2.rotation.x=135*Math.PI/2; 
+                cowbox.position.y=-88;
+                cow2.parent=cowbox;
+                cowbox.physicsImpostor = new BABYLON.PhysicsImpostor(cowbox, BABYLON.PhysicsImpostor.BoxImpostor, {mass: 1000, friction:100, restitution: 0}, scene);
+                cowbox.position.x=-2400;
+                cowbox.position.z=950;
+                cow2.position.z=-35;
+                
+                cow2.actionManager = new BABYLON.ActionManager(scene);
+                cow2.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickUpTrigger, function () {
+                    cowsound.play();
+                }));
+                });
               
                var foxbox = BABYLON.MeshBuilder.CreateBox("cowbox",{ height: 3, width: 5, depth: 4}, scene);
-               foxbox.visibility = 0.8;
+               foxbox.visibility = 0;
             const fox= BABYLON.SceneLoader.ImportMesh("", "./assets/fox/", "13577_Tibetan_Hill_Fox_v1_L3.obj", scene, function(object) {
                 // You can apply properties to object.
                 fox2 = object[0];
@@ -957,8 +1081,8 @@ scene.registerBeforeRender(function () {
                 fox2.rotation.x=135*Math.PI/2;
                 foxbox.position.y=-90;
                 fox2.parent=foxbox;
-                foxbox.position.x=-1000;
-                foxbox.position.z=0;
+                foxbox.position.x=-800;
+                foxbox.position.z=80;
                 fox2.actionManager = new BABYLON.ActionManager(scene);
                 fox2.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickUpTrigger, function () {
                     foxsound.play();
@@ -966,7 +1090,7 @@ scene.registerBeforeRender(function () {
             });
 
             var rabbitbox = BABYLON.MeshBuilder.CreateBox("cowbox",{ height: 3, width: 5, depth: 4}, scene);
-               rabbitbox.visibility = 0.8;
+               rabbitbox.visibility = 0;
             const rabbit= BABYLON.SceneLoader.ImportMesh("", "./assets/rabbit/", "Rabbit.obj", scene, function(object) {
                 // You can apply properties to object.
                 rabbit2 = object[0];
@@ -976,20 +1100,21 @@ scene.registerBeforeRender(function () {
                 rabbit2.rotation.x=180*Math.PI/2;
                 rabbitbox.position.y=-90;
                 rabbit2.parent=rabbitbox;
-                rabbitbox.physicsImpostor = new BABYLON.PhysicsImpostor(rabbitbox, BABYLON.PhysicsImpostor.BoxImpostor, {mass: 30,friction:1000, restitution: 0}, scene);
-                rabbitbox.position.x=-3000;
+                rabbitbox.position.x=-1300;
                 rabbitbox.position.z=0;
                 rabbit2.actionManager = new BABYLON.ActionManager(scene);
                 rabbit2.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickUpTrigger, function () {
                     rabbitsound.play();
                 }));
                 var direction = true;
-               /* scene.registerBeforeRender(function () {
+               scene.registerBeforeRender(function () {
                     // Check if box is moving right
-                    if (rabbit2.position.y < -40 && direction) {
+                    var vai=true;
+                    if(rabbitbox.position.x>-3000 && vai){
+                    if (rabbitbox.position.y < -40 && direction) {
                         // Increment box position to the right
-                        rabbit2.position.y += 1;
-                        rabbit2.position.x -= 1;
+                        rabbitbox.position.y += 1;
+                        rabbitbox.position.x -= 1;
                     }
                     else {
                         // Swap directions to move left
@@ -997,22 +1122,28 @@ scene.registerBeforeRender(function () {
                     }
             
                     // Check if box is moving left
-                    if (rabbit2.position.y > -80 && !direction) {
+                    if (rabbitbox.position.y > -80 && !direction) {
                         // Decrement box position to the left
-                        rabbit2.position.y -= 1;
-                        rabbit2.position.x -= 1;
+                        rabbitbox.position.y -= 1;
+                        rabbitbox.position.x -= 1;
                     }
                     else {
                         // Swap directions to move right
                         direction = true;
                     }
+                }
+                if(rabbitbox.position.x<=-3000) {
+                    rabbitbox.dispose();
+                    rabbit2.dispose();
+                    labelrabbit.dispose();
+                }
                 });
-             */
+             
             });
                 
 
-            var batbox = BABYLON.MeshBuilder.CreateBox("cowbox",{ height: 3, width: 5, depth: 4}, scene);
-            batbox.visibility = 0.8;
+            var batbox = BABYLON.MeshBuilder.CreateBox("batbox",{ height: 3, width: 5, depth: 4}, scene);
+            batbox.visibility = 0;
             const bat= BABYLON.SceneLoader.ImportMesh("", "./assets/bat/", "Bat.obj", scene, function(object) {
                 // You can apply properties to object.
                 bat2 = object[0];
@@ -1022,9 +1153,9 @@ scene.registerBeforeRender(function () {
                 bat2.rotation.x=180*Math.PI/2;
                 batbox.position.y=0;
                 bat2.parent=batbox;
-                batbox.position.x=10;
+                batbox.position.x=800;
                 batbox.position.z=0;
-                bat2.position.y=-20;
+                bat2.position.y=10;
                 bat2.actionManager = new BABYLON.ActionManager(scene);
                 bat2.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickUpTrigger, function () {
                     batsound.play();
@@ -1033,17 +1164,45 @@ scene.registerBeforeRender(function () {
                 var texture = new BABYLON.Texture("textures/bat.jpg", scene);
                 mat.diffuseTexture = texture;
                 bat2.material=mat;
+                var ok=true;
+                // Code in this function will run ~60 times per second
+               scene.registerBeforeRender(function () {
+                // Check if box is moving right
+               
+                if (batbox.position.x > -800 && ok) {
+                    // Increment box position to the right
+                    batbox.position.x -= 2;
+                    bat2.rotation.z=-90*Math.PI/2;;
+                } 
+                else ok=false;
+
+                if (batbox.position.x < 800 && ok==false) {
+                    // Increment box position to the right
+                    batbox.position.x += 2;   
+                }
+                else ok=true;
+        
+             
+
+            });
+            
                 
             });
-
+            var fienobox = BABYLON.MeshBuilder.CreateBox("dogbox",{ height: 15, width: 36, depth: 36}, scene);
+            fienobox.visibility = 0;
             const fieno= BABYLON.SceneLoader.ImportMesh("", "./assets/fieno/", "11543_BundleOfStraw_V2_l1.obj", scene, function(object) {
                 // You can apply properties to object.
                 fieno2 = object[0];
-                fieno2.scaling = new BABYLON.Vector3(1, 1, 1);
+                fieno2.scaling = new BABYLON.Vector3(0.2, 0.7, 0.3);
                 fieno2.rotation.z=180*Math.PI/2;
-                fieno2.rotation.y=45*Math.PI/2;
-                fieno2.rotation.x=180*Math.PI/2;
-                fieno2.position = new BABYLON.Vector3(-3410, -60, 0);
+                fieno2.rotation.y=90*Math.PI/2;
+                fieno2.rotation.x=135*Math.PI/2;
+                fienobox.position.y=-90;
+                fieno2.parent=fienobox;
+                fienobox.position.z=-700;
+                fienobox.position.x=-2400;
+                fieno2.position.y=-10;
+                fienobox.physicsImpostor = new BABYLON.PhysicsImpostor(fienobox, BABYLON.PhysicsImpostor.BoxImpostor, {mass: 100,friction:100, restitution: 0}, scene);
                 fieno2.actionManager = new BABYLON.ActionManager(scene);
                 var mat = new BABYLON.StandardMaterial("mat", scene);
                 var texture = new BABYLON.Texture("textures/fieno.jpg", scene);
@@ -1057,7 +1216,7 @@ scene.registerBeforeRender(function () {
                 house2.scaling = new BABYLON.Vector3(100, 100, 100);
                 house2.rotation.z=180*Math.PI/2;
                 house2.rotation.y=45*Math.PI/2;
-                house2.position = new BABYLON.Vector3(-3470, -100, 1000);
+                house2.position = new BABYLON.Vector3(-1750, -100, 600);
                 var mat = new BABYLON.StandardMaterial("mat", scene);
                 var texture = new BABYLON.Texture("textures/legno.jpg", scene);
                 mat.diffuseTexture = texture;
@@ -1092,15 +1251,15 @@ scene.registerBeforeRender(function () {
                 house2.scaling = new BABYLON.Vector3(100, 100, 100);
                 house2.rotation.z=180*Math.PI/2;
                 house2.rotation.y=180*Math.PI/2;
-                house2.position = new BABYLON.Vector3(-3470, -100, -1000);
+                house2.position = new BABYLON.Vector3(-2800, -100, -1300);
                 var mat = new BABYLON.StandardMaterial("mat", scene);
                 var texture = new BABYLON.Texture("textures/legno2.jpg", scene);
                 mat.diffuseTexture = texture;
                 house2.material=mat;
             });
 
-            var vulturebox = BABYLON.MeshBuilder.CreateBox("cowbox",{ height: 3, width: 5, depth: 4}, scene);
-            vulturebox.visibility = 0.8;
+            var vulturebox = BABYLON.MeshBuilder.CreateBox("vulturebox",{ height: 3, width: 5, depth: 4}, scene);
+            vulturebox.visibility = 0;
             const vulture= BABYLON.SceneLoader.ImportMesh("", "./assets/vulture/", "13582_GoldenVulture_V1_L3.obj", scene, function(object) {
                 // You can apply properties to object.
                 vult = object[0];
@@ -1117,8 +1276,8 @@ scene.registerBeforeRender(function () {
                     vulturesound.play();
                 }));
             });
-            var birdbox = BABYLON.MeshBuilder.CreateBox("cowbox",{ height: 3, width: 5, depth: 4}, scene);
-            birdbox.visibility = 0.8;
+            var birdbox = BABYLON.MeshBuilder.CreateBox("birdbox",{ height: 3, width: 5, depth: 4}, scene);
+            birdbox.visibility = 0;
             const bird= BABYLON.SceneLoader.ImportMesh("", "./assets/bird/", "12244_Bird_v1_L2.obj", scene, function(object) {
                 // You can apply properties to object.
                 bird1 = object[0];
@@ -1177,7 +1336,7 @@ label.fontFamily = "Verdana";
 
 
     var turtlebox = BABYLON.MeshBuilder.CreateBox("dogbox",{ height: 1, width: 1, depth: 1}, scene);
-    turtlebox.visibility = 0.8;
+    turtlebox.visibility = 0;
     
             const turtle= BABYLON.SceneLoader.ImportMesh("", "./assets/turtle/", "20446_Sea_Turtle_v1 Textured.obj", scene, function(object) {
                 // You can apply properties to object.
@@ -1225,22 +1384,24 @@ label.fontFamily = "Verdana";
             });
 
             var snakebox = BABYLON.MeshBuilder.CreateBox("dogbox",{ height: 3, width: 2, depth: 2}, scene);
-    snakebox.visibility = 0.8;
+    snakebox.visibility = 0;
     
             const snake= BABYLON.SceneLoader.ImportMesh("", "./assets/anaconda/", "13571_Anaconda_v1_L2.obj", scene, function(object) {
                 // You can apply properties to object.
                 snake1 = object[0];
-                snake1.scaling = new BABYLON.Vector3(0.2, 0.2, 0.2);
+                snake1.scaling = new BABYLON.Vector3(0.3, 0.3, 0.3);
                 snake1.rotation.z=90*Math.PI/2;
                 snake1.rotation.y=180*Math.PI/2;
                 snake1.rotation.x=180*Math.PI/2;
                 snake1.rotation.x=135*Math.PI/2;
-                snakebox.position.y=-80;
+                snakebox.position.y=-75;
                 snake1.parent=snakebox;
-                snakebox.position.x=200;
-                snakebox.position.z=-20;
-
-
+                snakebox.position.x=-2400;
+                snakebox.position.z=-700;
+                var mat = new BABYLON.StandardMaterial("mat", scene);
+                var texture = new BABYLON.Texture("textures/serpente.jpg", scene);
+                mat.diffuseTexture = texture;
+                snake1.material=mat;
                 snake1.actionManager = new BABYLON.ActionManager(scene);
                 snake1.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickUpTrigger, function () {
                     snakesound.play();
@@ -1254,7 +1415,13 @@ label.fontFamily = "Verdana";
 
  
 
-    
+            var firebox = BABYLON.MeshBuilder.CreateBox("firebox",{ height: 5, width: 200, depth: 200}, scene);
+            firebox.visibility = 0;
+            firebox.position.x = -2970;
+                firebox.position.z = -300;
+                firebox.position.y = -85;
+                firebox.physicsImpostor = new BABYLON.PhysicsImpostor(firebox, BABYLON.PhysicsImpostor.BoxImpostor, {mass: 30,friction:100, restitution: 0}, scene);
+
 
             const fire= BABYLON.SceneLoader.ImportMesh("", "./assets/tree/", "fireplace.obj", scene, function(object) {
                 // You can apply properties to object.
@@ -1439,36 +1606,31 @@ label.fontFamily = "Verdana";
                 }
                
                 tree.isVisible = false;
+                engine.hideLoadingUI();
             });
             
            
             return scene;
         };
 
-        window.initFunction = async function() {               
-            var asyncEngineCreation = async function() {
-                try {
-                return createDefaultEngine();
-                } catch(e) {
-                console.log("the available createEngine function failed. Creating the default engine instead");
-                return createDefaultEngine();
-                }
-            }
-
-            window.engine = await asyncEngineCreation();
-if (!engine) throw 'engine should not be null.';
-window.scene = createScene();};
-initFunction().then(() => {sceneToRender = scene        
-    engine.runRenderLoop(function () {
-        divFps.innerHTML = engine.getFps().toFixed() + " fps";
-        if (sceneToRender && sceneToRender.activeCamera) {
-            sceneToRender.render();
+ 
+window.scene = createScene();
+   
+engine.runRenderLoop(function () {
+    divFps.innerHTML = engine.getFps().toFixed() + " fps";
+    if(clicks==0){
+        if (scene.getWaitingItemsCount() === 0) {
+            engine.hideLoadingUI();
+            scene0.render();
+        } else {
+            engine.displayLoadingUI();
         }
-    });
+    }                   
+    else {
+        advancedTexture1.dispose();
+        scene.render();
+    }
 });
-
-// Resize
 window.addEventListener("resize", function () {
     engine.resize();
 });
-           
