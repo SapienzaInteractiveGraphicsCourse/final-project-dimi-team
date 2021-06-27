@@ -31,6 +31,9 @@ camera.minZ = 0;
 //camera.maxZ = 3570;
 camera.attachControl(canvas, true);
 
+// GUI
+//var advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI", true, scene);
+
 const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 100, 0),scene);
             light.position = new BABYLON.Vector3(-3800, 100, -200);
             light.diffuse = new BABYLON.Color3(1, 1, 1);
@@ -103,9 +106,9 @@ anibot.position.z = 0;
 anibot.position.y = 5.5;
 anibot.parent = robbox;
 robbox.physicsImpostor = new BABYLON.PhysicsImpostor(robbox, BABYLON.PhysicsImpostor.BoxImpostor, {mass: 50,friction:1.5,  restitution: 0}, scene);
-robbox.position.x = -250;
-robbox.position.z = 1900;
-robbox.position.y = -60;
+robbox.position.x = -50;
+robbox.position.z = 0;
+robbox.position.y = 0;
 robbox.physicsImpostor.physicsBody.inertia.setZero();
     robbox.physicsImpostor.physicsBody.invInertia.setZero();
     robbox.physicsImpostor.physicsBody.invInertiaWorld.setZero();
@@ -389,9 +392,11 @@ scene.registerBeforeRender(function () {
         
         //anibotbot.rotation.y-=0.05;
        // anibotbot.rotate(new BABYLON.Vector3 (0.1,1.2,0.1), 0.15, BABYLON.Space.LOCAL); 
-
-  
-
+       if(turtlebox.position.x-robbox.position.x<10 ){
+        advancedTexture.addControl(label);
+        label.linkWithMesh(turtlebox);
+       }
+       else advancedTexture.removeControl(label);
 
 });
 
@@ -535,7 +540,9 @@ scene.registerBeforeRender(function () {
             var storksound = new BABYLON.Sound("stork", "sounds/stork.wav", scene);
             var rabbitsound = new BABYLON.Sound("rabbit", "sounds/rabbit.wav", scene);
             var batsound = new BABYLON.Sound("bat", "sounds/bat.wav", scene);
-            var vulturesound = new BABYLON.Sound("bat", "sounds/vulture1.wav", scene);
+            var vulturesound = new BABYLON.Sound("vulture", "sounds/vulture1.wav", scene);
+            var ducksound = new BABYLON.Sound("duck", "sounds/duck.wav", scene);
+            var turtlesound = new BABYLON.Sound("duck", "sounds/turtle.wav", scene);
 
 
                 //Grass
@@ -893,15 +900,66 @@ scene.registerBeforeRender(function () {
                 vult.rotation.y=135*Math.PI/2;
                 vult.rotation.x=135*Math.PI/2;
                 vult.position = new BABYLON.Vector3(-265, 95, 2000);
-                var mat = new BABYLON.StandardMaterial("mat", scene);
-                var texture = new BABYLON.Texture("textures/legno2.jpg", scene);
-                mat.diffuseTexture = texture;
-                vult.material=mat;
                 vult.actionManager = new BABYLON.ActionManager(scene);
                 vult.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickUpTrigger, function () {
                     vulturesound.play();
                 }));
             });
+
+            const bird= BABYLON.SceneLoader.ImportMesh("", "./assets/bird/", "12244_Bird_v1_L2.obj", scene, function(object) {
+                // You can apply properties to object.
+                bird1 = object[0];
+                bird1.scaling = new BABYLON.Vector3(0.3, 0.3, 0.3);
+                bird1.rotation.z=135*Math.PI/2;
+                bird1.rotation.y=180*Math.PI/2;
+                bird1.rotation.x=135*Math.PI/2;
+                bird1.position = new BABYLON.Vector3(1100, -80, 30);
+                bird1.actionManager = new BABYLON.ActionManager(scene);
+                bird1.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickUpTrigger, function () {
+                    ducksound.play();
+                }));
+            });
+            
+
+var advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
+
+var label = new BABYLON.GUI.TextBlock();
+label.fontFamily = "Lucida Console";
+label.text = "Turtle";
+label.height = "13px";
+label.color = "white";
+
+
+
+    var turtlebox = BABYLON.MeshBuilder.CreateBox("dogbox",{ height: 3, width: 5, depth: 4}, scene);
+    turtlebox.visibility = 0.8;
+    
+            const turtle= BABYLON.SceneLoader.ImportMesh("", "./assets/turtle/", "20446_Sea_Turtle_v1 Textured.obj", scene, function(object) {
+                // You can apply properties to object.
+                trt = object[0];
+                trt.scaling = new BABYLON.Vector3(1, 1, 1);
+                trt.rotation.z=135*Math.PI/2;
+                trt.rotation.y=180*Math.PI/2;
+                trt.rotation.x=135*Math.PI/2;
+                turtlebox.position.y=-90;
+                trt.parent=turtlebox;
+                turtlebox.position.x=1000;
+                turtlebox.position.z=-30;
+
+                trt.actionManager = new BABYLON.ActionManager(scene);
+                trt.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickUpTrigger, function () {
+                    turtlesound.play();
+                }));
+                
+                
+            });
+
+
+
+
+ 
+
+    
 
             const fire= BABYLON.SceneLoader.ImportMesh("", "./assets/tree/", "fireplace.obj", scene, function(object) {
                 // You can apply properties to object.
